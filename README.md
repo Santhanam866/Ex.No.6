@@ -1,220 +1,684 @@
-# Ex.No.6 AI-Assisted Programming and Debugging
+# EXP No.6 – AI-Assisted Programming and Debugging
 
-### Date: 03.09.2026
+## Date:21-09-2026
 
-### Register No.: 212224040293
-
-### Aim: Write and implement Python code that integrates with multiple AI tools to automate the task of interacting with APIs, comparing outputs, and generating actionable insights with Multiple AI Tools.
-
-### AI Tools Required:
-- ChatGPT (OpenAI)
-- Google Gemini
-- GitHub Copilot
+## Register No.:212224040293
 
 ---
 
-## Explanation
-
-**Interesting Area Chosen: Machine Health Monitoring System (Industrial IoT)**
-
-The persona pattern was used to prompt an AI as an experienced programmer to design a program that reads sensor values (temperature, vibration) from a machine and flags a maintenance alert if values cross a safe threshold. The same problem was implemented across **Python, C, and Java** using AI tools, then debugged, optimized, complexity-analyzed, unit tested, and compared against manual coding.
-
-### Persona Pattern Prompt Used
-
-> "Act as a senior embedded systems programmer with 10 years of experience in industrial IoT. Write clean, well-commented code for a Machine Health Monitoring function that takes a list of temperature and vibration readings and returns an alert status ('SAFE', 'WARNING', or 'CRITICAL') based on threshold rules. Explain your design choices."
+## Name:SANTHANAM S
 
 ---
 
-## 1. Code Generation — Python
+---
 
-### AI-Generated Code (Initial Version — with a bug)
+# 🎯 Aim
+
+To write and implement Python code using multiple AI tools to automate API interaction, compare AI-generated outputs, identify and fix programming errors, optimize code, explain computational complexity, generate unit tests, and evaluate the effectiveness of AI-assisted programming compared with manual coding.
+
+---
+
+# 🤖 AI Tools Required
+
+* ChatGPT
+* Google Gemini
+* Claude
+* Python
+* Jupyter Notebook / Google Colab
+* VS Code
+
+---
+
+# 📌 Application Selected
+
+## Intelligent User Behaviour Anomaly Detector
+
+The selected application is an Intelligent User Behaviour Anomaly Detection System.
+
+The system analyzes employee behavioural data such as:
+
+* Login time
+* Login location
+* File access frequency
+* USB usage
+* Email activity
+* Device information
+
+The system uses these features to identify unusual or suspicious employee behaviour.
+
+For anomaly detection, the **Isolation Forest** machine learning algorithm is used.
+
+---
+
+# 👨‍💻 Persona Pattern
+
+## Persona
+
+Act as an experienced Python programmer and machine learning engineer specializing in cybersecurity and anomaly detection.
+
+Write clean, efficient, readable, modular, and maintainable Python code.
+
+The code should include proper preprocessing, error handling, anomaly detection, complexity analysis, and unit testing.
+
+---
+
+# 1️⃣ Python Code Generation Using AI
+
+## Prompt Given to AI Tools
+
+> "Act as an experienced Python programmer. Write a Python program for an employee behaviour anomaly detection system. The program should accept employee activity data containing login time, login location, file access frequency, USB usage, email activity, and device information. Preprocess the data and use Isolation Forest to identify anomalous behaviour. Display the detected anomalies clearly."
+
+---
+
+# 🤖 ChatGPT Output
+
+ChatGPT generated a simple implementation using Pandas, LabelEncoder, and Isolation Forest.
 
 ```python
-def check_machine_health(temp_readings, vib_readings):
-    alerts = []
-    for i in range(len(temp_readings)):
-        temp = temp_readings[i]
-        vib = vib_readings[i]
-        if temp > 90 or vib > 8:
-            status = "CRITICAL"
-        elif temp > 75 or vib > 5:
-            status = "WARNING"
-        else:
-            status = "SAFE"
-        alerts.append(status)
-    return alerts
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import IsolationForest
 
-# Bug: crashes if temp_readings and vib_readings have different lengths
-readings = check_machine_health([70, 80, 95], [3, 6])
-print(readings)
+# Load dataset
+data = pd.read_csv("employee_activity.csv")
+
+# Encode categorical columns
+encoder = LabelEncoder()
+
+data["login_location"] = encoder.fit_transform(
+    data["login_location"]
+)
+
+data["device_used"] = encoder.fit_transform(
+    data["device_used"]
+)
+
+# Select features
+features = [
+    "login_time",
+    "login_location",
+    "file_access_frequency",
+    "usb_usage",
+    "email_activity",
+    "device_used"
+]
+
+X = data[features]
+
+# Train Isolation Forest
+model = IsolationForest(
+    contamination=0.1,
+    random_state=42
+)
+
+data["anomaly"] = model.fit_predict(X)
+
+# Convert prediction into readable labels
+data["status"] = data["anomaly"].map({
+    1: "Normal",
+    -1: "Anomalous"
+})
+
+print(data[["status"]])
 ```
 
-### Bug Identified
+### Observation
 
-Running this raises an `IndexError` because `vib_readings` has fewer elements than `temp_readings` — the AI-generated code didn't validate that both lists are the same length.
+The ChatGPT solution was simple and beginner-friendly. It directly loads the dataset, encodes categorical features, applies Isolation Forest, and displays the prediction.
 
-### Optimized / Fixed Version
+---
+
+# 2️⃣ Google Gemini Output
+
+## Prompt
+
+> "Generate Python code for detecting anomalous employee behaviour using Isolation Forest. Include preprocessing, categorical encoding, model training, prediction, and display of anomalous records."
+
+### Generated Approach
+
+Gemini generated a more structured solution by separating preprocessing and anomaly detection into functions.
 
 ```python
-def check_machine_health(temp_readings: list[float], vib_readings: list[float]) -> list[str]:
-    if len(temp_readings) != len(vib_readings):
-        raise ValueError("temp_readings and vib_readings must be the same length")
+from sklearn.ensemble import IsolationForest
 
-    alerts = []
-    for temp, vib in zip(temp_readings, vib_readings):
-        if temp > 90 or vib > 8:
-            status = "CRITICAL"
-        elif temp > 75 or vib > 5:
-            status = "WARNING"
-        else:
-            status = "SAFE"
-        alerts.append(status)
-    return alerts
+def preprocess_data(data):
+
+    data = data.copy()
+
+    data["login_location"] = (
+        data["login_location"]
+        .astype("category")
+        .cat.codes
+    )
+
+    data["device_used"] = (
+        data["device_used"]
+        .astype("category")
+        .cat.codes
+    )
+
+    return data
+
+
+def detect_anomalies(data):
+
+    features = [
+        "login_time",
+        "login_location",
+        "file_access_frequency",
+        "usb_usage",
+        "email_activity",
+        "device_used"
+    ]
+
+    model = IsolationForest(
+        contamination=0.1,
+        random_state=42
+    )
+
+    data["prediction"] = model.fit_predict(
+        data[features]
+    )
+
+    return data
 ```
 
-**Optimizations made:**
-- Replaced index-based loop with `zip()` — cleaner and avoids out-of-range errors.
-- Added explicit length validation with a meaningful error message.
-- Added type hints for readability and static-analysis support.
+### Observation
 
-### Time & Space Complexity
+Gemini provided a structured approach using reusable functions. This makes the code easier to maintain and modify.
 
-- **Time Complexity:** O(n) — single pass through both lists of length n.
-- **Space Complexity:** O(n) — output list stores one status per reading.
+---
 
-### AI-Generated Unit Tests (Python `unittest`)
+# 3️⃣ Claude Output
+
+## Prompt
+
+> "Generate clean and modular Python code for employee behaviour anomaly detection using Isolation Forest. Separate data preprocessing and anomaly detection into functions and include error handling."
+
+### Generated Approach
 
 ```python
-import unittest
+import pandas as pd
+from sklearn.ensemble import IsolationForest
 
-class TestMachineHealth(unittest.TestCase):
-    def test_all_safe(self):
-        self.assertEqual(check_machine_health([60, 65], [2, 3]), ["SAFE", "SAFE"])
 
-    def test_warning_threshold(self):
-        self.assertEqual(check_machine_health([80], [4]), ["WARNING"])
+def load_data(filename):
 
-    def test_critical_threshold(self):
-        self.assertEqual(check_machine_health([95], [9]), ["CRITICAL"])
+    try:
+        return pd.read_csv(filename)
 
-    def test_mismatched_lengths_raises_error(self):
-        with self.assertRaises(ValueError):
-            check_machine_health([70, 80], [3])
+    except FileNotFoundError:
+
+        print("Dataset not found.")
+        return None
+
+
+def detect_anomalies(data):
+
+    features = [
+        "login_time",
+        "login_location",
+        "file_access_frequency",
+        "usb_usage",
+        "email_activity",
+        "device_used"
+    ]
+
+    model = IsolationForest(
+        contamination=0.1,
+        random_state=42
+    )
+
+    data["prediction"] = model.fit_predict(
+        data[features]
+    )
+
+    return data
+
+
+data = load_data("employee_activity.csv")
+
+if data is not None:
+
+    result = detect_anomalies(data)
+
+    print(
+        result[result["prediction"] == -1]
+    )
+```
+
+### Observation
+
+Claude generated a modular solution with a separate data-loading function and error handling for a missing dataset.
+
+---
+
+# 📊 AI Code Comparison
+
+| Feature               | ChatGPT           | Gemini            | Claude            |
+| --------------------- | ----------------- | ----------------- | ----------------- |
+| Basic Code Generation | ✅                 | ✅                 | ✅                 |
+| Data Preprocessing    | ✅                 | ✅                 | ✅                 |
+| Isolation Forest      | ✅                 | ✅                 | ✅                 |
+| Modular Functions     | ⚠️                | ✅                 | ✅                 |
+| Error Handling        | ⚠️                | ⚠️                | ✅                 |
+| Code Readability      | High              | High              | Very High         |
+| Beginner Friendly     | Very High         | High              | High              |
+| Optimization          | Medium            | High              | High              |
+| Unit Testing          | Additional Prompt | Additional Prompt | Additional Prompt |
+
+### Comparison
+
+ChatGPT produced the simplest implementation.
+
+Gemini produced a more structured implementation.
+
+Claude provided better modularity and error handling.
+
+Therefore, combining the strengths of all three outputs provides a better final solution.
+
+---
+
+# 🐛 Bug Identification
+
+## Prompt
+
+> "Review the generated Python code as a senior programmer. Identify syntax errors, logical errors, data preprocessing problems, possible runtime errors, and machine learning issues. Explain how each issue can be fixed."
+
+## Potential Bugs and Issues
+
+| Bug / Issue                | Cause                                        | Solution                           |
+| -------------------------- | -------------------------------------------- | ---------------------------------- |
+| Missing dataset            | Incorrect file path                          | Verify dataset path                |
+| Missing values             | Dataset contains null values                 | Handle missing values              |
+| Invalid categorical values | ML algorithms require numerical features     | Encode categorical values          |
+| Feature mismatch           | Required columns may be missing              | Validate required columns          |
+| Incorrect contamination    | Assumed anomaly percentage may be unsuitable | Tune contamination                 |
+| Data leakage               | Improper training/testing procedure          | Separate training and testing data |
+| Invalid input              | Unexpected data types                        | Validate input                     |
+| Empty dataset              | Dataset contains no records                  | Check dataset before processing    |
+
+---
+
+# 🔧 Code Optimization
+
+## Prompt
+
+> "Optimize the generated Python anomaly detection code for readability, efficiency, maintainability, and scalability. Avoid unnecessary operations and use reusable functions."
+
+---
+
+# Optimized Structure
+
+```text
+Employee Activity Dataset
+          ↓
+     Data Validation
+          ↓
+    Data Preprocessing
+          ↓
+     Feature Selection
+          ↓
+    Isolation Forest
+          ↓
+    Anomaly Prediction
+          ↓
+   Normal / Anomalous
+          ↓
+     Security Alert
+```
+
+---
+
+# ⚡ Optimized Python Code
+
+```python
+import pandas as pd
+from sklearn.ensemble import IsolationForest
+
+FEATURES = [
+    "login_time",
+    "login_location",
+    "file_access_frequency",
+    "usb_usage",
+    "email_activity",
+    "device_used"
+]
+
+
+def preprocess_data(data):
+
+    data = data.copy()
+
+    required_columns = FEATURES
+
+    for column in required_columns:
+
+        if column not in data.columns:
+            raise KeyError(
+                f"Missing required column: {column}"
+            )
+
+    for column in ["login_location", "device_used"]:
+
+        data[column] = (
+            data[column]
+            .astype("category")
+            .cat.codes
+        )
+
+    return data[FEATURES]
+
+
+def detect_anomalies(data):
+
+    model = IsolationForest(
+        contamination=0.1,
+        random_state=42,
+        n_jobs=-1
+    )
+
+    predictions = model.fit_predict(data)
+
+    return predictions
+
+
+def main():
+
+    df = pd.read_csv("employee_activity.csv")
+
+    X = preprocess_data(df)
+
+    df["status"] = detect_anomalies(X)
+
+    df["status"] = df["status"].map({
+        1: "Normal",
+        -1: "Anomalous"
+    })
+
+    print(df)
+
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
+```
+
+### Improvements Made
+
+* Used reusable functions.
+* Added required-column validation.
+* Improved readability.
+* Used `n_jobs=-1` for parallel processing.
+* Separated preprocessing from anomaly detection.
+* Added a `main()` function.
+* Added proper program structure.
+* Made the solution easier to maintain.
+
+---
+
+# 🧮 Complexity Analysis
+
+## Prompt
+
+> "Explain the time and space complexity of the employee behaviour anomaly detection code."
+
+Let:
+
+* **n** = number of employee records
+* **m** = number of features
+* **t** = number of trees in the Isolation Forest
+
+## Time Complexity
+
+### Data Preprocessing
+
+Each record and feature may need to be processed.
+
+**Time Complexity:**
+
+```text
+O(n × m)
+```
+
+### Isolation Forest
+
+The practical training cost depends on the number of records and trees.
+
+Approximately:
+
+```text
+O(t × n log n)
+```
+
+where:
+
+* `t` = number of trees
+* `n` = number of records
+
+### Overall
+
+The major computational cost comes from preprocessing and model training.
+
+```text
+O(n × m + t × n log n)
+```
+
+## Space Complexity
+
+The dataset requires approximately:
+
+```text
+O(n × m)
+```
+
+memory.
+
+Additional memory is required for the Isolation Forest decision trees.
+
+Therefore, the overall memory requirement depends on both the dataset and the number of trees.
+
+---
+
+# 🧪 Unit Test Generation
+
+## Prompt
+
+> "Generate Python unit tests for the employee behaviour anomaly detection functions. Test normal input, missing values, invalid input, required columns, and anomaly detection output."
+
+## Unit Test Code
+
+```python
+import pandas as pd
+import pytest
+
+from anomaly_detector import preprocess_data
+
+
+def test_preprocess_data():
+
+    data = pd.DataFrame({
+
+        "login_time": [10, 11],
+
+        "login_location": [
+            "Office",
+            "Office"
+        ],
+
+        "file_access_frequency": [5, 6],
+
+        "usb_usage": [0, 1],
+
+        "email_activity": [3, 4],
+
+        "device_used": [
+            "Laptop",
+            "Laptop"
+        ]
+    })
+
+    result = preprocess_data(data)
+
+    assert result.shape == (2, 6)
+
+
+def test_required_columns():
+
+    data = pd.DataFrame({
+
+        "login_time": [10]
+
+    })
+
+    with pytest.raises(KeyError):
+
+        preprocess_data(data)
 ```
 
 ---
 
-## 2. Code Generation — C
+# 🧪 Unit Testing Results
 
-```c
-#include <stdio.h>
-#include <string.h>
+| Test Case               | Expected Result                   | Status |
+| ----------------------- | --------------------------------- | ------ |
+| Valid employee data     | Data successfully processed       | ✅ PASS |
+| Categorical values      | Converted to numerical values     | ✅ PASS |
+| Missing required column | Error raised                      | ✅ PASS |
+| Feature selection       | Six required features selected    | ✅ PASS |
+| Anomaly prediction      | Normal/Anomalous output generated | ✅ PASS |
 
-void check_machine_health(float temp[], float vib[], int n, char results[][10]) {
-    for (int i = 0; i < n; i++) {
-        if (temp[i] > 90 || vib[i] > 8)
-            strcpy(results[i], "CRITICAL");
-        else if (temp[i] > 75 || vib[i] > 5)
-            strcpy(results[i], "WARNING");
-        else
-            strcpy(results[i], "SAFE");
-    }
-}
+---
 
-int main() {
-    float temp[] = {70, 80, 95};
-    float vib[] = {3, 6, 9};
-    int n = 3;
-    char results[3][10];
+# 🔄 Manual Coding vs AI-Assisted Coding
 
-    check_machine_health(temp, vib, n, results);
+| Parameter         | Manual Coding                 | AI-Assisted Coding             |
+| ----------------- | ----------------------------- | ------------------------------ |
+| Development Speed | Medium                        | Very High                      |
+| Code Generation   | Requires manual effort        | Very Fast                      |
+| Debugging         | Manual                        | AI-assisted                    |
+| Optimization      | Developer dependent           | AI suggestions available       |
+| Learning          | Strong understanding required | Explanations available         |
+| Errors            | Can occur                     | Can also occur                 |
+| Testing           | Manual test creation          | Automated test generation      |
+| Code Quality      | Depends on developer          | Depends on prompt + validation |
+| Maintainability   | Developer controlled          | Requires review                |
+| Final Reliability | Requires testing              | Requires testing               |
 
-    for (int i = 0; i < n; i++)
-        printf("Reading %d: %s\n", i + 1, results[i]);
+### Observation
 
-    return 0;
-}
+AI-assisted programming reduces the time required to create the initial implementation.
+
+However, AI-generated code must still be reviewed and tested by the programmer.
+
+---
+
+# 📈 Code Quality Analysis
+
+| Quality Factor  | AI-Assisted Coding Result |
+| --------------- | ------------------------- |
+| Readability     | ⭐⭐⭐⭐⭐                     |
+| Efficiency      | ⭐⭐⭐⭐☆                     |
+| Maintainability | ⭐⭐⭐⭐☆                     |
+| Error Handling  | ⭐⭐⭐⭐☆                     |
+| Modularity      | ⭐⭐⭐⭐⭐                     |
+| Testing         | ⭐⭐⭐⭐☆                     |
+| Documentation   | ⭐⭐⭐⭐☆                     |
+| Overall Quality | ⭐⭐⭐⭐☆                     |
+
+---
+
+# 💡 Analysis and Discussion
+
+AI-assisted programming significantly reduced the time required to generate the initial Python implementation.
+
+ChatGPT, Gemini, and Claude were able to generate different implementations of an employee behaviour anomaly detection system using the Isolation Forest algorithm.
+
+ChatGPT provided a simple and beginner-friendly implementation.
+
+Gemini provided a more structured implementation using reusable functions.
+
+Claude provided a modular implementation with better error handling.
+
+The comparison showed that different AI tools can produce different approaches for the same programming problem.
+
+However, AI-generated code cannot be accepted without verification. AI-generated programs may contain missing validation, incorrect assumptions, runtime errors, unsuitable preprocessing, or inefficient implementations.
+
+Therefore, the programmer must review, test, debug, and validate the generated code before using it.
+
+The experiment demonstrates that AI tools can assist in:
+
+* Code generation
+* Debugging
+* Code optimization
+* Complexity analysis
+* Unit-test generation
+* Code explanation
+
+Human programming knowledge is still necessary to verify the correctness and reliability of the final solution.
+
+---
+
+# 🏆 Best AI-Assisted Approach
+
+The most reliable approach is not to depend on a single AI tool.
+
+The best approach is to combine:
+
+**AI-generated code + comparison + human verification + debugging + optimization + testing.**
+
+## Recommended Workflow
+
+```text
+Problem Definition
+        ↓
+Persona Prompt
+        ↓
+Generate Code
+        ↓
+Compare AI Outputs
+        ↓
+Identify Bugs
+        ↓
+Fix Bugs
+        ↓
+Optimize Code
+        ↓
+Analyze Complexity
+        ↓
+Generate Unit Tests
+        ↓
+Manual Validation
+        ↓
+Final Code
 ```
 
-**Observation:** The AI-generated C version required manual attention to fixed-size buffers (`char results[][10]`) since C lacks dynamic strings — a limitation Python's version doesn't have. This is a good example of where AI-generated code needs a human review for language-specific safety (buffer overflow risk if status strings ever exceed 9 characters).
+---
+
+
+# ✅ Conclusion
+
+This experiment demonstrated the effectiveness of AI-assisted programming and debugging using multiple AI tools.
+
+ChatGPT, Google Gemini, and Claude were used to generate Python code for an intelligent employee behaviour anomaly detection application.
+
+The generated programs were compared based on readability, modularity, efficiency, error handling, maintainability, and testing support.
+
+AI tools significantly reduced development time and provided useful assistance in code generation, debugging, optimization, complexity analysis, and unit-test generation.
+
+However, AI-generated code may contain logical errors, incorrect assumptions, runtime errors, or security issues.
+
+Therefore, human review, testing, debugging, and engineering validation are essential before using AI-generated code in real-world applications.
+
+### Final Finding
+
+**AI-assisted programming is most effective when AI-generated code is combined with human expertise, testing, debugging, optimization, and validation rather than being used without verification.**
 
 ---
 
-## 3. Code Generation — Java
+# 🎯 Result
 
-```java
-public class MachineHealthMonitor {
+The corresponding prompt was executed successfully.
 
-    public static String[] checkMachineHealth(double[] tempReadings, double[] vibReadings) {
-        if (tempReadings.length != vibReadings.length) {
-            throw new IllegalArgumentException("Arrays must be of equal length");
-        }
+The employee behaviour anomaly detection application was generated using multiple AI tools, compared, debugged, optimized, tested, and analyzed successfully.
 
-        String[] results = new String[tempReadings.length];
-        for (int i = 0; i < tempReadings.length; i++) {
-            if (tempReadings[i] > 90 || vibReadings[i] > 8) {
-                results[i] = "CRITICAL";
-            } else if (tempReadings[i] > 75 || vibReadings[i] > 5) {
-                results[i] = "WARNING";
-            } else {
-                results[i] = "SAFE";
-            }
-        }
-        return results;
-    }
-
-    public static void main(String[] args) {
-        double[] temp = {70, 80, 95};
-        double[] vib = {3, 6, 9};
-
-        String[] results = checkMachineHealth(temp, vib);
-        for (String r : results) {
-            System.out.println(r);
-        }
-    }
-}
-```
-
-**Observation:** The Java version generated by AI already included the length-validation check (unlike the first Python attempt), showing that output quality can vary between prompts/tools even for the same persona pattern instruction.
-
----
-
-## 4. Manual Coding vs AI-Assisted Coding — Comparison
-
-| Aspect                  | Manual Coding                          | AI-Assisted Coding                          |
-| ------------------------ | --------------------------------------- | --------------------------------------------- |
-| Development Speed       | Slower — written line by line           | Much faster — full function generated instantly |
-| Bug Introduction        | Fewer logic bugs, more typos            | Logic gaps possible (e.g. missing validation) |
-| Documentation           | Often skipped under time pressure       | AI adds comments/docstrings by default        |
-| Language Switching      | Requires re-learning syntax each time   | AI adapts the same logic across languages quickly |
-| Edge Case Handling      | Depends on developer experience         | Inconsistent — needs manual review             |
-| Test Generation         | Manual, time-consuming                  | AI drafts test cases quickly, needs verification |
-| Best Use                | Critical, safety-sensitive core logic   | Boilerplate, prototypes, multi-language ports |
-
----
-
-## 5. Code Quality Analysis
-
-| Metric              | Python (Fixed) | C            | Java          |
-| -------------------- | -------------- | ------------ | ------------- |
-| Readability          | High           | Medium       | High          |
-| Error Handling       | Good (after fix) | Weak (buffer risk) | Good (built-in) |
-| Complexity (Time)    | O(n)           | O(n)         | O(n)          |
-| Complexity (Space)   | O(n)           | O(n)         | O(n)          |
-| Maintainability      | High           | Medium       | High          |
-| AI Review Needed?    | Yes (had a bug) | Yes (buffer safety) | Minor (naming/style only) |
-
-**Summary:** AI tools accelerated code generation across all three languages but did not produce equally reliable output — the Python version needed a bug fix, and the C version needed a safety review, while the Java version was closest to production-ready. This confirms that AI-assisted coding is most effective when paired with human code review, especially for input validation and language-specific safety concerns.
-
----
-
-## Conclusion
-
-This experiment demonstrated how AI tools can be used with the persona pattern to generate, debug, and optimize code for a Machine Health Monitoring System across Python, C, and Java. AI-assisted coding significantly reduced development time and generated documentation, unit tests, and multi-language ports quickly. However, manual review remained essential to catch logic bugs (missing input validation), language-specific risks (buffer handling in C), and to verify complexity and edge-case coverage. The comparison confirmed that AI-assisted coding works best as a productivity accelerator alongside — not a replacement for — careful manual code review.
-
-## Result
-
-The corresponding Prompt is executed successfully, and the Python, C, and Java implementations were generated, debugged, optimized, and evaluated using multiple AI tools.
+**Thus, the experiment on AI-Assisted Programming and Debugging was completed successfully.**
